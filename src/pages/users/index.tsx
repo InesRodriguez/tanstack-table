@@ -1,4 +1,4 @@
-import * as React from 'react';
+
 import {
   createColumnHelper,
   flexRender,
@@ -8,39 +8,53 @@ import {
   SortingState,
   getPaginationRowModel
 } from '@tanstack/react-table';
-import mockData from '../../data.json';
 import { useUsers } from './hooks/useUsers';
-import { useQuery } from '@tanstack/react-query';
 import { User } from './interfaces';
+import { formatDate } from '../../helper/date-format';
+import { useState } from 'react';
 
 const columnHelper = createColumnHelper<User>();
 
 const columns = [
   columnHelper.accessor('id', {
+    id: 'id',
     cell: (info) => info.getValue()
   }),
   columnHelper.accessor('name', {
-    cell: (info) => info.getValue()
+    id: 'name',
+    cell: (info) => info.getValue(),
+    header: () => 'Nombre'
   }),
   columnHelper.accessor((row) => row.email, {
     id: 'email',
     cell: (info) => <i>{info.getValue()}</i>,
-    header: () => <span>Email</span>
+    header: () =>'Correo'
   }),
   columnHelper.accessor('role', {
-    header: () => 'role',
+    id: 'role',
+    header: () => 'rol',
     cell: (info) => info.renderValue()
+  }),
+  columnHelper.accessor('creationAt', {
+    id: 'creationAt',
+    header: () => 'Fecha de creación',
+    cell: (info) => formatDate(info.getValue()!)
+  }),
+  columnHelper.accessor('updatedAt', {
+    id: 'updatedAt',
+    header: () => 'Fecha de actualización',
+    cell: (info) =>  formatDate(info.getValue()!)
+  }),
+  columnHelper.accessor('avatar', {
+    id: 'avatar',
+    header: () => 'Avatar',
+    cell: (info) => <img src={info.getValue()} alt='avatar' className='w-10 h-10 rounded-full' />
   })
 ];
 
 export default function Users() {
   const { usersQuery } = useUsers();
-  console.log('usersQuery', usersQuery.data);
-  // const [data] = React.useState(() => [...mockData]);
-  const [sorting, setSorting] = React.useState<SortingState>([{ id: 'id', desc: false }]);
-  React.useEffect(() => {
-    console.log(sorting);
-  }, [sorting]);
+  const [sorting, setSorting] = useState<SortingState>([]);
   const table = useReactTable({
     data: usersQuery.data ?? [],
     columns,
@@ -68,7 +82,7 @@ export default function Users() {
             <table className='border'>
               <thead>
                 {table.getHeaderGroups().map((headerGroup) => (
-                  <tr key={headerGroup.id} className='border-b text-gray-800 uppercase'>
+                  <tr key={headerGroup.id} className='border-b text-gray-800'>
                     {headerGroup.headers.map((header) => (
                       <th key={header.id} className='px-4 pr-2 py-4 font-medium text-left'>
                         {header.isPlaceholder ? null : (
